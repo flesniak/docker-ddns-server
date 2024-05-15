@@ -1,12 +1,11 @@
 #!/bin/bash
 
-#[ -z "$DDNS_ADMIN_LOGIN" ] && echo "DDNS_ADMIN_LOGIN not set" && exit 1;
-[ -z "$DDNS_DOMAINS" ] && echo "DDNS_DOMAINS not set" && exit 1;
-[ -z "$DDNS_PARENT_NS" ] && echo "DDNS_PARENT_NS not set" && exit 1;
-[ -z "$DDNS_DEFAULT_TTL" ] && echo "DDNS_DEFAULT_TTL not set" && exit 1;
-[ -z "$DDNS_TRANSFER" ] && echo "DDNS_TRANSFER not set" && exit 1;
+[ -z "$DDNS_DOMAINS" ] && echo "DDNS_DOMAINS not set" && exit 1
+[ -z "$DDNS_PARENT_NS" ] && echo "DDNS_PARENT_NS not set" && exit 1
+[ -z "$DDNS_DEFAULT_TTL" ] && echo "DDNS_DEFAULT_TTL not set" && exit 1
+[ -z "$DDNS_TRANSFER" ] && echo "DDNS_TRANSFER not set" && exit 1
 
-DDNS_IP=$(curl icanhazip.com)
+[ -z "$DDNS_IP" ] && DDNS_IP=$(curl icanhazip.com)
 
 for d in ${DDNS_DOMAINS//,/ }
 do
