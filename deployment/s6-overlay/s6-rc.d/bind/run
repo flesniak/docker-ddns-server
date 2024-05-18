@@ -1,3 +1,2 @@
-#!/bin/bash
-test -f /etc/default/named && . /etc/default/named
-exec /usr/sbin/named -u bind -f
+#!/command/execlineb -P
+/usr/sbin/named -u named -g
