@@ -12,7 +12,7 @@ on:
 
 # Define environment variables for the entire workflow for easy configuration
 env:
-  DOCKER_IMAGE_NAME: w3kllc/ddns
+  DOCKER_IMAGE_NAME: flesniak/ddns
 
 jobs:
   Build-Em-All:
