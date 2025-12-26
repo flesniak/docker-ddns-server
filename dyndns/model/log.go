@@ -13,7 +13,7 @@ type Log struct {
 	Message   string
 	Host      Host
 	HostID    uint
-	SentIP    string
+	SentIPs   string
 	CallerIP  string
 	TimeStamp time.Time
 	UserAgent string

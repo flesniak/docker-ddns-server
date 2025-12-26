@@ -303,7 +303,7 @@ func (h *Handler) UpdateIP(c echo.Context) (err error) {
 	}
 
 	log := &model.Log{Status: false, Host: *host, TimeStamp: time.Now(), UserAgent: nswrapper.ShrinkUserAgent(c.Request().UserAgent())}
-	log.SentIP = c.QueryParam(("myip"))
+	log.SentIPs = c.QueryParam(("myip"))
 
 	// Get caller IP
 	log.CallerIP, _ = nswrapper.GetCallerIP(c.Request())
@@ -330,8 +330,11 @@ func (h *Handler) UpdateIP(c echo.Context) (err error) {
 		return c.String(http.StatusBadRequest, "notfqdn\n")
 	}
 
+	// multiple IP addresses can be given and must use comma as separator
+	sentIPs = strings.Split(log.SentIPs, ",")
+
 	// Get IP type
-	ipType := nswrapper.GetIPType(log.SentIP)
+	ipType := nswrapper.GetIPType()
 	if ipType == "" {
 		log.SentIP = log.CallerIP
 		ipType = nswrapper.GetIPType(log.SentIP)
