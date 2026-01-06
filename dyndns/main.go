@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/w3K-one/docker-ddns-server/dyndns/handler"
 	"github.com/foolin/goview"
 	"github.com/foolin/goview/supports/echoview-v4"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/w3K-one/docker-ddns-server/dyndns/handler"
 )
 
 func main() {
@@ -76,7 +76,7 @@ func main() {
 
 	// Apply IP blocker middleware globally
 	e.Use(h.IPBlockerMiddleware())
-	
+
 	// Apply cleanup middleware
 	e.Use(h.CleanupMiddleware())
 
@@ -87,14 +87,14 @@ func main() {
 
 	// Admin routes with session-based authentication and HTTPS redirect
 	groupAdmin := e.Group("/@")
-	
+
 	// Apply HTTPS redirect middleware (only for admin routes)
 	groupAdmin.Use(h.HTTPSRedirectMiddleware())
-	
+
 	// Login routes (no auth required)
 	groupAdmin.GET("/login", h.ShowLoginPage)
 	groupAdmin.POST("/login", h.HandleLogin)
-	
+
 	// Logout route (no auth required - handles its own session check)
 	groupAdmin.GET("/logout", h.HandleLogout)
 
@@ -135,15 +135,15 @@ func main() {
 	updateRoute := e.Group("/update")
 	updateRoute.Use(h.UpdateAuthMiddleware())
 	updateRoute.GET("", h.UpdateIP)
-	
+
 	nicRoute := e.Group("/nic")
 	nicRoute.Use(h.UpdateAuthMiddleware())
 	nicRoute.GET("/update", h.UpdateIP)
-	
+
 	v2Route := e.Group("/v2")
 	v2Route.Use(h.UpdateAuthMiddleware())
 	v2Route.GET("/update", h.UpdateIP)
-	
+
 	v3Route := e.Group("/v3")
 	v3Route.Use(h.UpdateAuthMiddleware())
 	v3Route.GET("/update", h.UpdateIP)

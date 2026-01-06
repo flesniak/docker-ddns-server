@@ -10,9 +10,9 @@ import (
 
 	l "github.com/labstack/gommon/log"
 
+	"github.com/labstack/echo/v4"
 	"github.com/w3K-one/docker-ddns-server/dyndns/model"
 	"github.com/w3K-one/docker-ddns-server/dyndns/nswrapper"
-	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
@@ -135,10 +135,10 @@ func (h *Handler) ListHosts(c echo.Context) (err error) {
 // AddHost just renders the "add host" website.
 func (h *Handler) AddHost(c echo.Context) (err error) {
 	return c.Render(http.StatusOK, "edithost", echo.Map{
-		"addEdit":  "add",
-		"config":   h.Config,
-		"title":    h.Title,
-		"logoPath": h.LogoPath,
+		"addEdit":      "add",
+		"config":       h.Config,
+		"title":        h.Title,
+		"logoPath":     h.LogoPath,
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
 	})
@@ -157,11 +157,11 @@ func (h *Handler) EditHost(c echo.Context) (err error) {
 	}
 
 	return c.Render(http.StatusOK, "edithost", echo.Map{
-		"host":     host,
-		"addEdit":  "edit",
-		"config":   h.Config,
-		"title":    h.Title,
-		"logoPath": h.LogoPath,
+		"host":         host,
+		"addEdit":      "edit",
+		"config":       h.Config,
+		"title":        h.Title,
+		"logoPath":     h.LogoPath,
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
 	})
@@ -193,13 +193,24 @@ func (h *Handler) CreateHost(c echo.Context) (err error) {
 	}
 
 	// If a ip is set create dns entry
-	if host.Ip != "" {
-		ipType := nswrapper.GetIPType(host.Ip)
-		if ipType == "" {
-			return c.JSON(http.StatusBadRequest, &Error{fmt.Sprintf("ip %s is not a valid ip", host.Ip)})
+	if host.Ip4 != "" {
+		ipType := nswrapper.GetIPType(host.Ip4)
+		if ipType != "A" {
+			return c.JSON(http.StatusBadRequest, &Error{fmt.Sprintf("ip %s is not a valid ipv4 address", host.Ip4)})
 		}
 
-		if err = nswrapper.UpdateRecord(host.Hostname, host.Ip, ipType, host.Domain, host.Ttl, h.AllowWildcard); err != nil {
+		if err = nswrapper.UpdateRecord(host.Hostname, host.Ip4, ipType, host.Domain, host.Ttl, h.AllowWildcard); err != nil {
+			return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+		}
+	}
+
+	if host.Ip6 != "" {
+		ipType := nswrapper.GetIPType(host.Ip6)
+		if ipType != "AAAA" {
+			return c.JSON(http.StatusBadRequest, &Error{fmt.Sprintf("ip %s is not a valid ipv6 address", host.Ip6)})
+		}
+
+		if err = nswrapper.UpdateRecord(host.Hostname, host.Ip6, ipType, host.Domain, host.Ttl, h.AllowWildcard); err != nil {
 			return c.JSON(http.StatusBadRequest, &Error{err.Error()})
 		}
 	}
@@ -241,13 +252,26 @@ func (h *Handler) UpdateHost(c echo.Context) (err error) {
 
 	// If ip or ttl changed update dns entry
 	if forceRecordUpdate {
-		ipType := nswrapper.GetIPType(host.Ip)
-		if ipType == "" {
-			return c.JSON(http.StatusBadRequest, &Error{fmt.Sprintf("ip %s is not a valid ip", host.Ip)})
+		if host.Ip4 != "" {
+			ipType := nswrapper.GetIPType(host.Ip4)
+			if ipType != "A" {
+				return c.JSON(http.StatusBadRequest, &Error{fmt.Sprintf("ip %s is not a valid ipv4 address", host.Ip4)})
+			}
+
+			if err = nswrapper.UpdateRecord(host.Hostname, host.Ip4, ipType, host.Domain, host.Ttl, h.AllowWildcard); err != nil {
+				return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+			}
 		}
 
-		if err = nswrapper.UpdateRecord(host.Hostname, host.Ip, ipType, host.Domain, host.Ttl, h.AllowWildcard); err != nil {
-			return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+		if host.Ip6 != "" {
+			ipType := nswrapper.GetIPType(host.Ip6)
+			if ipType != "AAAA" {
+				return c.JSON(http.StatusBadRequest, &Error{fmt.Sprintf("ip %s is not a valid ipv6 address", host.Ip6)})
+			}
+
+			if err = nswrapper.UpdateRecord(host.Hostname, host.Ip6, ipType, host.Domain, host.Ttl, h.AllowWildcard); err != nil {
+				return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+			}
 		}
 	}
 
@@ -331,35 +355,60 @@ func (h *Handler) UpdateIP(c echo.Context) (err error) {
 	}
 
 	// multiple IP addresses can be given and must use comma as separator
-	sentIPs = strings.Split(log.SentIPs, ",")
-
-	// Get IP type
-	ipType := nswrapper.GetIPType()
-	if ipType == "" {
-		log.SentIP = log.CallerIP
-		ipType = nswrapper.GetIPType(log.SentIP)
-		if ipType == "" {
-			log.Message = "Bad Request: Sent IP is invalid"
+	sentIPs := strings.Split(log.SentIPs, ",")
+	ipv4 := ""
+	ipv6 := ""
+	for _, sentIP := range sentIPs {
+		// Get IP type
+		ipType := nswrapper.GetIPType(sentIP)
+		switch ipType {
+		case "A":
+			ipv4 = sentIP
+		case "AAAA":
+			ipv6 = sentIP
+		default:
+			log.Message = "Failed to parse sent ip"
 			if err = h.CreateLogEntry(log); err != nil {
 				l.Error(err)
 			}
-
-			return c.String(http.StatusBadRequest, "badrequest\n")
+			continue // ignore unmatched IPs
 		}
 	}
 
-	// Add/update DNS record
-	if err = nswrapper.UpdateRecord(log.Host.Hostname, log.SentIP, ipType, log.Host.Domain, log.Host.Ttl, h.AllowWildcard); err != nil {
-		log.Message = fmt.Sprintf("DNS error: %v", err)
-		l.Error(log.Message)
+	if ipv4 == "" && ipv6 == "" {
+		log.Message = "Bad Request: No valid IP (neither v4 nor v6) found"
 		if err = h.CreateLogEntry(log); err != nil {
 			l.Error(err)
 		}
-		return c.String(http.StatusBadRequest, "dnserr\n")
+		return c.String(http.StatusBadRequest, "badrequest\n")
+	}
+
+	// Add/update DNS records
+	if ipv4 != "" {
+		if err = nswrapper.UpdateRecord(log.Host.Hostname, ipv4, "A", log.Host.Domain, log.Host.Ttl, h.AllowWildcard); err != nil {
+			log.Message = fmt.Sprintf("DNS error: %v", err)
+			l.Error(log.Message)
+			if err = h.CreateLogEntry(log); err != nil {
+				l.Error(err)
+			}
+			return c.String(http.StatusBadRequest, "dnserr\n")
+		}
+		log.Host.Ip4 = ipv4
+	}
+
+	if ipv6 != "" {
+		if err = nswrapper.UpdateRecord(log.Host.Hostname, ipv6, "AAAA", log.Host.Domain, log.Host.Ttl, h.AllowWildcard); err != nil {
+			log.Message = fmt.Sprintf("DNS error: %v", err)
+			l.Error(log.Message)
+			if err = h.CreateLogEntry(log); err != nil {
+				l.Error(err)
+			}
+			return c.String(http.StatusBadRequest, "dnserr\n")
+		}
+		log.Host.Ip6 = ipv6
 	}
 
 	// Update DB host entry
-	log.Host.Ip = log.SentIP
 	log.Host.LastUpdate = log.TimeStamp
 
 	if err = h.DB.Save(log.Host).Error; err != nil {

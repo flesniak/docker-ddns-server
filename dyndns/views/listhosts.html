@@ -19,7 +19,14 @@
         <tr id="host_{{.ID}}">
             <td id="host-domain_{{.ID}}">{{.Domain}}</td>
             <td id="host-hostname_{{.ID}}">{{.Hostname}}.{{.Domain}}</td>
-            <td>{{.Ip}}</td>
+            <td>{{if eq .Ip6 "" }}
+                    {{.Ip4}}
+                {{else if eq .Ip4 "" }}
+                    {{.Ip6}}
+                {{else}}
+                    {{.Ip4}}<br/>{{.Ip6}}
+                {{end}}
+            </td>
             <td>{{.Ttl}}</td>
             <td>{{.LastUpdate.Format "01/02/2006 15:04 MEZ"}}</td>
             <td>

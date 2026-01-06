@@ -5,17 +5,19 @@ import (
 
 	"github.com/labstack/gommon/log"
 
+	golog "log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/w3K-one/docker-ddns-server/dyndns/model"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/tg123/go-htpasswd"
+	"github.com/w3K-one/docker-ddns-server/dyndns/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type Handler struct {
@@ -126,7 +128,7 @@ func (h *Handler) ParseEnvs() (adminAuth bool, err error) {
 	if !ok {
 		h.Title = "w3K DynDNS"
 	}
-	
+
 	// ADDED: Check for logo files in the static icons directory upon startup.
 	logoExtensions := []string{"png", "webp", "svg"}
 	for _, ext := range logoExtensions {
@@ -137,7 +139,7 @@ func (h *Handler) ParseEnvs() (adminAuth bool, err error) {
 			break
 		}
 	}
-	
+
 	allowWildcard, ok := os.LookupEnv("DDNS_ALLOW_WILDCARD")
 	if ok {
 		h.AllowWildcard, err = strconv.ParseBool(allowWildcard)
@@ -201,18 +203,31 @@ func (h *Handler) InitDB() (err error) {
 		}
 	}
 
-	h.DB, err = gorm.Open(sqlite.Open("database/ddns.db"), &gorm.Config{})
+	newLogger := logger.New(
+		golog.New(os.Stdout, "\r\n:", golog.LstdFlags),
+		logger.Config{
+			SlowThreshold:             200 * time.Millisecond,
+			LogLevel:                  logger.Warn,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  true,
+		},
+	)
+
+	h.DB, err = gorm.Open(
+		sqlite.Open("database/ddns.db"),
+		&gorm.Config{Logger: newLogger},
+	)
 	if err != nil {
 		return err
 	}
 
 	// Migrate all models including new security models
 	err = h.DB.AutoMigrate(
-		&model.Host{}, 
-		&model.CName{}, 
+		&model.Host{},
+		&model.CName{},
 		&model.Log{},
-		&model.FailedAuth{},   // NEW: Failed authentication tracking
-		&model.BlockedIP{},     // NEW: Blocked IP tracking
+		&model.FailedAuth{}, // NEW: Failed authentication tracking
+		&model.BlockedIP{},  // NEW: Blocked IP tracking
 	)
 
 	return err
