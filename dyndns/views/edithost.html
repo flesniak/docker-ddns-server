@@ -74,6 +74,23 @@
                 <div class="col-1"></div>
             </div>
             <div class="row mt-3">
+                <div class="col-1"></div>
+                <div class="col-2 text-right">Track IPv6 prefix of another host:</div>
+                <div class="col-8 input-group">
+                    <input type="text" class="form-control" placeholder="IPv6 Host Adress" name="ip6hostpart" value="{{.host.Ip6HostPart}}">
+                    <div class="input-group-append">
+                        <select class="custom-select" name="trackinghostid">
+                            <option selected value="none">None</option>
+                        {{range $host, $id := .otherHosts}}
+                            <a class="dropdown-item"><option {{if eq $.host.TrackingHostID $id}}selected{{end}} value="{{$id}}">{{$host}}</option></a>
+                        {{end}}
+                        </select>
+                    </div>
+                    <input type="text" class="form-control" placeholder="IPv6 Host Part Size" name="ip6hostsize" value="{{if eq $.addEdit "edit"}}{{.host.Ip6HostSize}}{{else}}64{{end}}">
+                </div>
+                <div class="col-1"></div>
+            </div>
+            <div class="row mt-3">
                 <div class="col-11 d-flex justify-content-end"><button id="{{.host.ID}}" class="{{.addEdit}} host btn btn-primary">{{if eq .addEdit "edit" }}Edit{{else if eq .addEdit "add" }}Add{{end}} Host Entry</button></div>
                 <div class="col-1"></div>
             </div>

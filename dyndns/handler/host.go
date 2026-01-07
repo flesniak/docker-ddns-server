@@ -134,6 +134,18 @@ func (h *Handler) ListHosts(c echo.Context) (err error) {
 
 // AddHost just renders the "add host" website.
 func (h *Handler) AddHost(c echo.Context) (err error) {
+	// Get a list of existing hosts as possible tracking targets
+	var hosts []model.Host
+	if err = h.DB.Find(&hosts).Error; err != nil {
+		return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+	}
+
+	otherHosts := make(map[string]uint)
+	for _, h := range hosts {
+		name := fmt.Sprintf("%s.%s", h.Hostname, h.Domain)
+		otherHosts[name] = h.ID
+	}
+
 	return c.Render(http.StatusOK, "edithost", echo.Map{
 		"addEdit":      "add",
 		"config":       h.Config,
@@ -141,6 +153,7 @@ func (h *Handler) AddHost(c echo.Context) (err error) {
 		"logoPath":     h.LogoPath,
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
+		"otherHosts":   otherHosts,
 	})
 }
 
@@ -156,6 +169,20 @@ func (h *Handler) EditHost(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, &Error{err.Error()})
 	}
 
+	// Get a list of existing hosts as possible tracking targets
+	var hosts []model.Host
+	if err = h.DB.Find(&hosts).Error; err != nil {
+		return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+	}
+
+	otherHosts := make(map[string]uint)
+	for _, h := range hosts {
+		if h != *host {
+			name := fmt.Sprintf("%s.%s", h.Hostname, h.Domain)
+			otherHosts[name] = h.ID
+		}
+	}
+
 	return c.Render(http.StatusOK, "edithost", echo.Map{
 		"host":         host,
 		"addEdit":      "edit",
@@ -164,6 +191,7 @@ func (h *Handler) EditHost(c echo.Context) (err error) {
 		"logoPath":     h.LogoPath,
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
+		"otherHosts":   otherHosts,
 	})
 }
 
@@ -179,6 +207,25 @@ func (h *Handler) CreateHost(c echo.Context) (err error) {
 	// Enforce lowercase for new entries
 	host.Hostname = strings.ToLower(host.Hostname)
 	host.UserName = strings.ToLower(host.UserName)
+
+	// TrackingHostID is not bound to host, maybe because it's uint -> do it manually
+	trackingHostID := c.FormValue("trackinghostid")
+	if trackingHostID != "none" {
+		id, err := strconv.Atoi(trackingHostID)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+		}
+
+		trackingHost := &model.Host{}
+		if err := h.DB.First(trackingHost, id).Error; err != nil {
+			return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+		}
+		// h.DB.Model(host).Association("TrackingHost").Replace(trackingHost)
+		host.TrackingHostID = uint(id)
+	} else {
+		// h.DB.Model(host).Association("TrackingHost").Clear()
+		host.TrackingHostID = 0
+	}
 
 	if err = c.Validate(host); err != nil {
 		return c.JSON(http.StatusBadRequest, &Error{err.Error()})
@@ -239,6 +286,25 @@ func (h *Handler) UpdateHost(c echo.Context) (err error) {
 	host := &model.Host{}
 	if err = h.DB.First(host, id).Error; err != nil {
 		return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+	}
+
+	// TrackingHostID is not bound to hostUpdate, maybe because it's uint -> do it manually
+	trackingHostID := c.FormValue("trackinghostid")
+	if trackingHostID != "none" {
+		id, err := strconv.Atoi(trackingHostID)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+		}
+
+		trackingHost := &model.Host{}
+		if err := h.DB.First(trackingHost, id).Error; err != nil {
+			return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+		}
+		// h.DB.Model(hostUpdate).Association("TrackingHost").Replace(trackingHost)
+		hostUpdate.TrackingHostID = uint(id)
+	} else {
+		// h.DB.Model(hostUpdate).Association("TrackingHost").Clear()
+		hostUpdate.TrackingHostID = 0
 	}
 
 	forceRecordUpdate := host.UpdateHost(hostUpdate)
