@@ -23,3 +23,22 @@ func ValidIP6(ip6Address string) bool {
 
 	return testInputIP6.To16() != nil
 }
+
+func MergeIP6NetworkHostAddress(networkAddress string, hostAddress string, hostAddressSize int) net.IP {
+	netAddr := net.ParseIP(networkAddress)
+	hostAddr := net.ParseIP(hostAddress)
+	mask := net.CIDRMask(128-hostAddressSize, 128)
+
+	// result = netAddr.Mask(mask)
+
+	netByte := []byte(netAddr.Mask(mask))
+	maskByte := []byte(mask)
+	hostByte := []byte(hostAddr)
+	resultByte := make([]byte, len(netByte))
+	for i, _ := range resultByte {
+		hostMask := maskByte[i] ^ 0xff
+		resultByte[i] = netAddr[i]&maskByte[i] | hostByte[i]&hostMask
+	}
+
+	return net.IP(resultByte)
+}

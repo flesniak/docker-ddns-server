@@ -4,17 +4,32 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/labstack/gommon/log"
-	"io/ioutil"
 	"os"
 	"os/exec"
+
+	l "github.com/labstack/gommon/log"
+	"github.com/w3K-one/docker-ddns-server/dyndns/model"
 )
+
+func UpdateHost(host model.Host, enableWildcard bool) {
+	if host.Ip4 != "" {
+		if err := UpdateRecord(host.Hostname, host.Ip4, "A", host.Domain, host.Ttl, enableWildcard); err != nil {
+			l.Error(fmt.Sprintf("DNS error: %v", err))
+		}
+	}
+
+	if host.Ip6 != "" {
+		if err := UpdateRecord(host.Hostname, host.Ip6, "AAAA", host.Domain, host.Ttl, enableWildcard); err != nil {
+			l.Error(fmt.Sprintf("DNS error: %v", err))
+		}
+	}
+}
 
 // UpdateRecord builds a nsupdate file and updates a record by executing it with nsupdate.
 func UpdateRecord(hostname string, target string, addrType string, zone string, ttl int, enableWildcard bool) error {
-	log.Info(fmt.Sprintf("%s record update request: %s -> %s", addrType, hostname, target))
+	l.Info(fmt.Sprintf("%s record update request: %s -> %s", addrType, hostname, target))
 
-	f, err := ioutil.TempFile(os.TempDir(), "dyndns")
+	f, err := os.CreateTemp(os.TempDir(), "dyndns")
 	if err != nil {
 		return err
 	}
@@ -58,7 +73,7 @@ func UpdateRecord(hostname string, target string, addrType string, zone string, 
 func DeleteRecord(hostname string, zone string, enableWildcard bool) error {
 	fmt.Printf("record delete request: %s\n", hostname)
 
-	f, err := ioutil.TempFile(os.TempDir(), "dyndns")
+	f, err := os.CreateTemp(os.TempDir(), "dyndns")
 	if err != nil {
 		return err
 	}
