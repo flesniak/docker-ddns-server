@@ -347,14 +347,35 @@ func (h *Handler) DeleteHost(c echo.Context) (err error) {
 // UpdateIP implements the update method called by the routers.
 // Hostname, IP and senders IP are validated, a log entry is created
 // and finally if everything is ok, the DNS Server will be updated
+// It supports the DynDNS protocol using the "hostname" and "myip" parameters,
+// as well as the dynv6 API using parameters "zone", "ipv4", "ipv6" and "ipv6prefix".
 func (h *Handler) UpdateIP(c echo.Context) (err error) {
 	host, ok := c.Get("updateHost").(*model.Host)
 	if !ok {
 		return c.String(http.StatusBadRequest, "badauth\n")
 	}
 
+	ipv4 := c.QueryParam("ipv4")
+	ipv6 := strings.ToLower(c.QueryParam("ipv6"))
+	ipv6prefix := strings.ToLower(c.QueryParam("ipv6prefix"))
+	myips := strings.ToLower(c.QueryParam("myip"))
+
 	log := &model.Log{Status: false, Host: *host, TimeStamp: time.Now(), UserAgent: nswrapper.ShrinkUserAgent(c.Request().UserAgent())}
-	log.SentIPs = c.QueryParam(("myip"))
+
+	// collect all sent ips for the log entry
+	log.SentIPs = ipv4
+	if log.SentIPs != "" && ipv6 != "" {
+		log.SentIPs += ","
+		log.SentIPs += ipv6
+	}
+	if log.SentIPs != "" && ipv6prefix != "" {
+		log.SentIPs += ","
+		log.SentIPs += ipv6prefix
+	}
+	if log.SentIPs != "" && myips != "" {
+		log.SentIPs += ","
+		log.SentIPs += myips
+	}
 
 	// Get caller IP
 	log.CallerIP, _ = nswrapper.GetCallerIP(c.Request())
@@ -372,6 +393,10 @@ func (h *Handler) UpdateIP(c echo.Context) (err error) {
 
 	// Validate hostname (already lowercased during authentication)
 	hostname := strings.ToLower(c.QueryParam("hostname"))
+	if hostname == "" {
+		// alternatively, try the "zone" parameter
+		hostname = strings.ToLower(c.QueryParam("zone"))
+	}
 	if hostname == "" || hostname != host.Hostname+"."+host.Domain {
 		log.Message = "Hostname or combination of authenticated user and hostname is invalid"
 		if err = h.CreateLogEntry(log); err != nil {
@@ -381,25 +406,64 @@ func (h *Handler) UpdateIP(c echo.Context) (err error) {
 		return c.String(http.StatusBadRequest, "notfqdn\n")
 	}
 
-	// multiple IP addresses can be given and must use comma as separator
-	sentIPs := strings.Split(log.SentIPs, ",")
-	for _, sentIP := range sentIPs {
-		// Get IP type
-		ipType := nswrapper.GetIPType(sentIP)
-		switch ipType {
-		case "A":
-			log.Host.Ip4 = sentIP
-		case "AAAA":
-			log.Host.Ip6 = sentIP
-		default:
+	// parse explicit fields (ipv4, ipv6, ipv6prefix) first
+	if ipv4 != "" {
+		ipType := nswrapper.GetIPType(ipv4)
+		if ipType != "A" {
+			log.Message = "Bad Request: Failed to parse ipv4"
 			if err = h.CreateLogEntry(log); err != nil {
-				l.Error(fmt.Sprintf("Failed to parse sent ip: %s", err))
+				l.Error(err)
 			}
-			continue // ignore unmatched IPs
+			return c.String(http.StatusBadRequest, "badrequest\n")
 		}
 	}
 
-	if log.Host.Ip4 == "" && log.Host.Ip6 == "" {
+	if ipv6 != "" {
+		ipType := nswrapper.GetIPType(ipv6)
+		if ipType != "AAAA" {
+			log.Message = "Bad Request: Failed to parse ipv6"
+			if err = h.CreateLogEntry(log); err != nil {
+				l.Error(err)
+			}
+			return c.String(http.StatusBadRequest, "badrequest\n")
+		}
+	}
+
+	if ipv6prefix != "" {
+		ipType := nswrapper.GetIPType(ipv6prefix)
+		if ipType != "AAAA" {
+			log.Message = "Bad Request: Failed to parse ipv6prefix"
+			if err = h.CreateLogEntry(log); err != nil {
+				l.Error(err)
+			}
+			return c.String(http.StatusBadRequest, "badrequest\n")
+		}
+	}
+
+	// the dyndns update protocol uses the "myip" parameter, use with lower priority than explicit parameters
+	// multiple IP addresses can be given and must use comma as separator
+	if myips != "" {
+		for _, myip := range strings.Split(myips, ",") {
+			switch nswrapper.GetIPType(myip) {
+			case "A":
+				if ipv4 == "" {
+					ipv4 = myip
+				}
+			case "AAAA":
+				if ipv6 == "" {
+					ipv6 = myip
+				}
+			default:
+				log.Message = fmt.Sprintf("Bad Request: Failed to parse sent ip %s", myip)
+				if err = h.CreateLogEntry(log); err != nil {
+					l.Error(err)
+				}
+				return c.String(http.StatusBadRequest, "badrequest\n")
+			}
+		}
+	}
+
+	if ipv4 == "" && ipv6 == "" && ipv6prefix == "" {
 		log.Message = "Bad Request: No valid IP (neither v4 nor v6) found"
 		if err = h.CreateLogEntry(log); err != nil {
 			l.Error(err)
@@ -407,34 +471,60 @@ func (h *Handler) UpdateIP(c echo.Context) (err error) {
 		return c.String(http.StatusBadRequest, "badrequest\n")
 	}
 
+	if ipv4 != "" {
+		log.Host.Ip4 = ipv4
+	}
+
+	if ipv6 != "" {
+		log.Host.Ip6 = ipv6
+	}
+
+	if ipv6prefix != "" {
+		log.Host.Ip6Prefix = ipv6prefix
+	}
+
 	// Update DB host entry
 	log.Host.LastUpdate = log.TimeStamp
 
 	if err = h.DB.Save(log.Host).Error; err != nil {
-		return c.JSON(http.StatusBadRequest, "badrequest\n")
+		return c.String(http.StatusBadRequest, "badrequest\n")
 	}
 
 	go nswrapper.UpdateHost(log.Host, h.AllowWildcard)
 
-	if log.Host.Ip6 != "" {
-		// Check all hosts tracking this host
-		var trackingHosts []model.Host
-		if err = h.DB.Where(&model.Host{TrackingHostID: log.Host.ID}).Find(&trackingHosts).Error; err != nil {
-			return c.JSON(http.StatusBadRequest, &Error{err.Error()})
+	// Check all hosts tracking this host
+	var trackingHosts []model.Host
+	if err = h.DB.Where(&model.Host{TrackingHostID: log.Host.ID}).Find(&trackingHosts).Error; err != nil {
+		log.Message = "Failed to query tracking hosts from DB"
+		if err = h.CreateLogEntry(log); err != nil {
+			l.Error(err)
+		}
+	}
+
+	for _, trackingHost := range trackingHosts {
+		var netAddress string
+		switch trackingHost.TrackingMode {
+		case 1:
+			netAddress = ipv6prefix
+		case 2:
+			netAddress = ipv6
+		default:
+			continue
 		}
 
-		for _, trackingHost := range trackingHosts {
-			newTrackingIp := ipparser.MergeIP6NetworkHostAddress(log.Host.Ip6, trackingHost.Ip6HostPart, trackingHost.Ip6HostSize)
-			l.Info(fmt.Sprintf("Updating tracking host %s with IP %s", trackingHost.Hostname, &newTrackingIp))
-			trackingHost.Ip6 = newTrackingIp.String()
-
-			if err = h.DB.Save(trackingHost).Error; err != nil {
-				return c.JSON(http.StatusBadRequest, "badrequest\n")
-			}
-
-			go nswrapper.UpdateHost(trackingHost, h.AllowWildcard)
+		if netAddress == "" {
+			continue
 		}
 
+		newTrackingIp := ipparser.MergeIP6NetworkHostAddress(netAddress, trackingHost.Ip6HostPart, trackingHost.Ip6HostSize)
+		l.Info(fmt.Sprintf("Updating tracking host %s with IP %s", trackingHost.Hostname, &newTrackingIp))
+		trackingHost.Ip6 = newTrackingIp.String()
+
+		if err = h.DB.Save(trackingHost).Error; err != nil {
+			return c.String(http.StatusBadRequest, "badrequest\n")
+		}
+
+		go nswrapper.UpdateHost(trackingHost, h.AllowWildcard)
 	}
 
 	log.Status = true

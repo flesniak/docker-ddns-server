@@ -17,7 +17,7 @@
                 <tr class="errorTooltip" title="<b>{{if .Status}}Successful{{else}}Failed{{end}}</b><br>{{.Message}}">
                     <td class="align-middle mx-auto"><div class="{{if .Status}}bg-success{{else}}bg-danger{{end}}" style="width: 16px; height: 16px; margin: auto"></div></td>
                     <td>{{.Host.Hostname}}.{{.Host.Domain}}</td>
-                    <td>{{.SentIP}}</td>
+                    <td>{{.SentIPs}}</td>
                     <td>{{.CreatedAt.Format "01/02/2006 15:04"}}</td>
                     <td>{{.UserAgent}}</td>
                     <td>{{.CallerIP}}</td>
