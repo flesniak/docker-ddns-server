@@ -11,9 +11,9 @@ import (
 	l "github.com/labstack/gommon/log"
 
 	"github.com/labstack/echo/v4"
-	"github.com/w3K-one/docker-ddns-server/dyndns/ipparser"
-	"github.com/w3K-one/docker-ddns-server/dyndns/model"
-	"github.com/w3K-one/docker-ddns-server/dyndns/nswrapper"
+	"github.com/benjaminbear/docker-ddns-server/dyndns/ipparser"
+	"github.com/benjaminbear/docker-ddns-server/dyndns/model"
+	"github.com/benjaminbear/docker-ddns-server/dyndns/nswrapper"
 	"gorm.io/gorm"
 )
 

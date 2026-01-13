@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/w3K-one/docker-ddns-server/dyndns/model"
+	"github.com/benjaminbear/docker-ddns-server/dyndns/model"
 )
 
 // CreateLogEntry simply adds a log entry to the database.

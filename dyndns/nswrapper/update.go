@@ -8,7 +8,7 @@ import (
 	"os/exec"
 
 	l "github.com/labstack/gommon/log"
-	"github.com/w3K-one/docker-ddns-server/dyndns/model"
+	"github.com/benjaminbear/docker-ddns-server/dyndns/model"
 )
 
 func UpdateHost(host model.Host, enableWildcard bool) {

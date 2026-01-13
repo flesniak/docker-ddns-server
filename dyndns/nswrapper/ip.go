@@ -9,7 +9,7 @@ import (
 
 	"github.com/labstack/gommon/log"
 
-	"github.com/w3K-one/docker-ddns-server/dyndns/ipparser"
+	"github.com/benjaminbear/docker-ddns-server/dyndns/ipparser"
 )
 
 // GetIPType finds out if the IP is IPv4 or IPv6

@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
-	"github.com/w3K-one/docker-ddns-server/dyndns/handler"
+	"github.com/benjaminbear/docker-ddns-server/dyndns/handler"
 )
 
 func main() {

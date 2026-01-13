@@ -1,4 +1,4 @@
-module github.com/w3K-one/docker-ddns-server/dyndns
+module github.com/benjaminbear/docker-ddns-server/dyndns
 
 go 1.22
 

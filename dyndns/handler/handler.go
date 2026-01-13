@@ -14,7 +14,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/tg123/go-htpasswd"
-	"github.com/w3K-one/docker-ddns-server/dyndns/model"
+	"github.com/benjaminbear/docker-ddns-server/dyndns/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

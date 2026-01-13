@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/labstack/gommon/log"
-	"github.com/w3K-one/docker-ddns-server/dyndns/model"
+	"github.com/benjaminbear/docker-ddns-server/dyndns/model"
 	"gorm.io/gorm"
 )
 
