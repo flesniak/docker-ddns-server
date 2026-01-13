@@ -35,7 +35,7 @@ func MergeIP6NetworkHostAddress(networkAddress string, hostAddress string, hostA
 	maskByte := []byte(mask)
 	hostByte := []byte(hostAddr)
 	resultByte := make([]byte, len(netByte))
-	for i, _ := range resultByte {
+	for i := range resultByte {
 		hostMask := maskByte[i] ^ 0xff
 		resultByte[i] = netAddr[i]&maskByte[i] | hostByte[i]&hostMask
 	}

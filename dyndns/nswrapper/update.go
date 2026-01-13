@@ -3,12 +3,13 @@ package nswrapper
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 
-	l "github.com/labstack/gommon/log"
 	"github.com/benjaminbear/docker-ddns-server/dyndns/model"
+	l "github.com/labstack/gommon/log"
 )
 
 func UpdateHost(host model.Host, enableWildcard bool) {
@@ -63,7 +64,7 @@ func UpdateRecord(hostname string, target string, addrType string, zone string, 
 	}
 
 	if out.String() != "" {
-		return fmt.Errorf(out.String())
+		return errors.New(out.String())
 	}
 
 	return nil
@@ -103,7 +104,7 @@ func DeleteRecord(hostname string, zone string, enableWildcard bool) error {
 	}
 
 	if out.String() != "" {
-		return fmt.Errorf(out.String())
+		return errors.New(out.String())
 	}
 
 	return nil
