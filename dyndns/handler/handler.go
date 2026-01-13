@@ -11,10 +11,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/benjaminbear/docker-ddns-server/dyndns/model"
+	"github.com/benjaminbear/docker-ddns-server/dyndns/nswrapper"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/tg123/go-htpasswd"
-	"github.com/benjaminbear/docker-ddns-server/dyndns/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -219,6 +220,34 @@ func (h *Handler) InitDB() (err error) {
 	)
 	if err != nil {
 		return err
+	}
+
+	// migrate the Ip column to either Ip4 or Ip6 before AutoMigrate
+	if h.DB.Migrator().HasColumn(&model.Host{}, "Ip") {
+		err = h.DB.Migrator().RenameColumn(&model.Host{}, "Ip", "Ip4")
+		if err != nil {
+			return err
+		}
+		err = h.DB.Migrator().AddColumn(&model.Host{}, "Ip6")
+		if err != nil {
+			return err
+		}
+
+		var hosts []model.Host
+		if err = h.DB.Find(&hosts).Error; err != nil {
+			return err
+		}
+		for _, host := range hosts {
+			switch nswrapper.GetIPType(host.Ip4) {
+			case "A": // this is fine
+			case "AAAA":
+				host.Ip6 = host.Ip4
+				host.Ip4 = ""
+			default: // parsing failed, clear Ip4 field
+				host.Ip4 = ""
+			}
+			h.DB.Model(&host).Updates(map[string]interface{}{"Ip4": host.Ip4, "Ip6": host.Ip6})
+		}
 	}
 
 	// Migrate all models including new security models
