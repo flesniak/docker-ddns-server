@@ -1,0 +1,4 @@
+#!/command/execlineb -P
+with-contenv
+cd /root
+/root/dyndns
