@@ -22,7 +22,7 @@ type Host struct {
 	TrackingHostID uint
 	TrackingHost   *Host  `gorm:"foreignkey:TrackingHostID" form:"trackinghost" validate:"omitempty,fqdn"`
 	Ip6HostPart    string `form:"ip6hostpart" validate:"omitempty,ipv6"`
-	Ip6HostSize    int    `gorm:"default=64" form:"ip6hostsize" validate:"min=1,max=127"`
+	Ip6HostSize    int    `gorm:"default=64" form:"ip6hostsize" validate:"omitempty,min=1,max=127"`
 }
 
 // UpdateHost updates all fields of a host entry

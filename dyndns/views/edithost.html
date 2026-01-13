@@ -70,20 +70,20 @@
             <label for="trackingmode" class="col-sm-3 col-form-label">IPv6 Host Tracking:</label>
             <div class="col-sm input-group" id="trackingmode-radios">
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="trackingmode" id="trackOff" value="0" {{if eq $.host.TrackingMode 0}}checked{{end}}>
+                    <input class="form-check-input" type="radio" name="trackingmode" id="trackOff" value="0" {{if or (eq .host.TrackingMode 0) (not .isEdit)}}checked{{end}}>
                     <label class="form-check-label" for="trackOff">Disabled</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="trackingmode" id="trackPrefix" value="1" {{if eq $.host.TrackingMode 1}}checked{{end}}>
+                    <input class="form-check-input" type="radio" name="trackingmode" id="trackPrefix" value="1" {{if eq .host.TrackingMode 1}}checked{{end}}>
                     <label class="form-check-label" for="trackPrefix">Use explicit IPv6 prefix</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="trackingmode" id="trackHostAddress" value="2" {{if eq $.host.TrackingMode 2}}checked{{end}}>
+                    <input class="form-check-input" type="radio" name="trackingmode" id="trackHostAddress" value="2" {{if eq .host.TrackingMode 2}}checked{{end}}>
                     <label class="form-check-label" for="trackHostAddress">Obtain prefix from host address</label>
                 </div>
             </div>
         </div>
-        <fieldset id="tracking-params" {{if eq $.host.TrackingMode 0}}disabled{{end}}>
+        <fieldset id="tracking-params" {{if or (eq .host.TrackingMode 0) (not .isEdit)}}disabled{{end}}>
             <div class="form-group row">
                 <label for="trackinghostid" class="col-sm-3 col-form-label">Host to track:</label>
                 <div class="col-sm">
@@ -103,7 +103,7 @@
                     <div class="input-group-prepend">
                         <div class="input-group-text">/</div>
                     </div>
-                    <input type="text" class="form-control" placeholder="Subnet Size" id="ip6hostsize" name="ip6hostsize" value="{{if .isEdit}}{{.host.Ip6HostSize}}{{else}}64{{end}}">
+                    <input type="text" class="form-control" placeholder="Subnet Size" id="ip6hostsize" name="ip6hostsize" value="{{if and (.isEdit) (gt .host.Ip6HostSize 0)}}{{.host.Ip6HostSize}}{{else}}64{{end}}">
                 </div>
             </div>
         </fieldset>
