@@ -10,8 +10,8 @@ WORKDIR /root/go/src/dyndns
 RUN go mod tidy
 RUN go build -o /root/go/bin/dyndns && go test -v
 
-FROM alpine:3.19
-ARG S6_OVERLAY_VERSION=3.1.6.2
+FROM alpine:3.23
+ARG S6_OVERLAY_VERSION=3.2.1.0
 
 RUN apk add --no-cache bind bind-tools curl
 
