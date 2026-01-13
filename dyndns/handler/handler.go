@@ -126,7 +126,7 @@ func (h *Handler) ParseEnvs() (adminAuth bool, err error) {
 	var ok bool
 	h.Title, ok = os.LookupEnv("DDNS_TITLE")
 	if !ok {
-		h.Title = "w3K DynDNS"
+		h.Title = "DynDNS Server"
 	}
 
 	// ADDED: Check for logo files in the static icons directory upon startup.
@@ -157,14 +157,14 @@ func (h *Handler) ParseEnvs() (adminAuth bool, err error) {
 
 	h.PoweredBy, ok = os.LookupEnv("DDNS_POWERED_BY")
 	if !ok || h.PoweredBy == "" {
-		h.PoweredBy = "w3K LLC"
+		h.PoweredBy = "Docker DDNS Server"
 	} else {
 		log.Info("Powered by set: ", h.PoweredBy)
 	}
 
 	h.PoweredByUrl, ok = os.LookupEnv("DDNS_POWERED_BY_URL")
 	if !ok || h.PoweredByUrl == "" {
-		h.PoweredByUrl = "https://w3K.one/"
+		h.PoweredByUrl = "http://localhost"
 	} else {
 		log.Info("Powered by URL set: ", h.PoweredByUrl)
 	}
