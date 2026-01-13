@@ -463,12 +463,20 @@ func (h *Handler) UpdateIP(c echo.Context) (err error) {
 		}
 	}
 
+	// if no IPs are submitted at all, use the caller IP as a last resort
 	if ipv4 == "" && ipv6 == "" && ipv6prefix == "" {
-		log.Message = "Bad Request: No valid IP (neither v4 nor v6) found"
-		if err = h.CreateLogEntry(log); err != nil {
-			l.Error(err)
+		switch nswrapper.GetIPType(log.CallerIP) {
+		case "A":
+			ipv4 = log.CallerIP
+		case "AAAA":
+			ipv6 = log.CallerIP
+		default:
+			log.Message = "Bad Request: No valid IP (neither v4 nor v6) found and caller ip check failed"
+			if err = h.CreateLogEntry(log); err != nil {
+				l.Error(err)
+			}
+			return c.String(http.StatusBadRequest, "badrequest\n")
 		}
-		return c.String(http.StatusBadRequest, "badrequest\n")
 	}
 
 	if ipv4 != "" {
