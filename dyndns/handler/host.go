@@ -148,7 +148,7 @@ func (h *Handler) AddHost(c echo.Context) (err error) {
 	}
 
 	return c.Render(http.StatusOK, "edithost", echo.Map{
-		"addEdit":      "add",
+		"isEdit":       false,
 		"config":       h.Config,
 		"title":        h.Title,
 		"logoPath":     h.LogoPath,
@@ -186,7 +186,7 @@ func (h *Handler) EditHost(c echo.Context) (err error) {
 
 	return c.Render(http.StatusOK, "edithost", echo.Map{
 		"host":         host,
-		"addEdit":      "edit",
+		"isEdit":       true,
 		"config":       h.Config,
 		"title":        h.Title,
 		"logoPath":     h.LogoPath,
