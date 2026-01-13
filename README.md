@@ -1,21 +1,21 @@
 # Dynamic DNS Server for Docker with Web UI written in Go
 
-![Build status](https://img.shields.io/github/actions/workflow/status/w3K-one/docker-ddns-server/BuildEmAll.yml)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/w3K-one/docker-ddns-server)
-![Go version](https://img.shields.io/github/go-mod/go-version/w3K-one/docker-ddns-server?filename=dyndns%2Fgo.mod)
-![License](https://img.shields.io/github/license/w3K-one/docker-ddns-server)
+![Build status](https://img.shields.io/github/actions/workflow/status/flesniak/docker-ddns-server/BuildEmAll.yml)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/flesniak/docker-ddns-server)
+![Go version](https://img.shields.io/github/go-mod/go-version/flesniak/docker-ddns-server?filename=dyndns%2Fgo.mod)
+![License](https://img.shields.io/github/license/flesniak/docker-ddns-server)
 
 With docker-ddns-server you can set up your own dynamic DNS server. This project is inspired by https://github.com/dprandzioch/docker-ddns. In addition to the original version, you can setup and maintain your dyndns entries via a simple web UI with comprehensive security features, modern authentication, and threat monitoring.
 
 <p float="left">
-<img src="https://raw.githubusercontent.com/w3K-one/docker-ddns-server/master/img/login.png" width="285">
-<img src="https://raw.githubusercontent.com/w3K-one/docker-ddns-server/master/img/listhosts.png" width="285">
-<img src="https://raw.githubusercontent.com/w3K-one/docker-ddns-server/master/img/addhost.png" width="285">
-<img src="https://raw.githubusercontent.com/w3K-one/docker-ddns-server/master/img/listcnames.png" width="285">
-<img src="https://raw.githubusercontent.com/w3K-one/docker-ddns-server/master/img/addcname.png" width="285">
-<img src="https://raw.githubusercontent.com/w3K-one/docker-ddns-server/master/img/listlogs.png" width="285">
-<img src="https://raw.githubusercontent.com/w3K-one/docker-ddns-server/master/img/security.png" width="285">
-<img src="https://raw.githubusercontent.com/w3K-one/docker-ddns-server/master/img/logout.png" width="285">
+<img src="https://raw.githubusercontent.com/flesniak/docker-ddns-server/master/img/login.png" width="285">
+<img src="https://raw.githubusercontent.com/flesniak/docker-ddns-server/master/img/listhosts.png" width="285">
+<img src="https://raw.githubusercontent.com/flesniak/docker-ddns-server/master/img/addhost.png" width="285">
+<img src="https://raw.githubusercontent.com/flesniak/docker-ddns-server/master/img/listcnames.png" width="285">
+<img src="https://raw.githubusercontent.com/flesniak/docker-ddns-server/master/img/addcname.png" width="285">
+<img src="https://raw.githubusercontent.com/flesniak/docker-ddns-server/master/img/listlogs.png" width="285">
+<img src="https://raw.githubusercontent.com/flesniak/docker-ddns-server/master/img/security.png" width="285">
+<img src="https://raw.githubusercontent.com/flesniak/docker-ddns-server/master/img/logout.png" width="285">
 </p>
 
 ## ✨ Key Features
@@ -37,7 +37,7 @@ You can either use the pre-built Docker image or build it yourself.
 
 ### Using the Docker Image
 
-Docker Hub: https://hub.docker.com/r/w3kllc/ddns
+Docker Hub: https://hub.docker.com/r/flesniak/ddns
 
 **Quick Start:**
 ```bash
@@ -53,12 +53,12 @@ docker run -it -d \
     -e DDNS_DEFAULT_TTL=3600 \
     -e DDNS_SESSION_SECRET=your-random-32-char-secret \
     --name=dyndns \
-    w3kllc/ddns:latest
+    flesniak/ddns:latest
 ```
 
 ### Using docker-compose (Recommended)
 
-For a complete setup example, see: [docker-compose.yml](https://github.com/w3K-one/docker-ddns-server/blob/master/deployment/docker-compose.yml)
+For a complete setup example, see: [docker-compose.yml](https://github.com/flesniak/docker-ddns-server/blob/master/deployment/docker-compose.yml)
 
 **Example docker-compose.yml:**
 ```yaml
@@ -66,7 +66,7 @@ version: '3.8'
 
 services:
   ddns:
-    image: w3kllc/ddns:latest
+    image: flesniak/ddns:latest
     container_name: dyndns
     ports:
       - "8080:8080"
@@ -488,13 +488,13 @@ Docker images are tagged using semantic versioning:
 **Example:**
 ```bash
 # Pull latest version
-docker pull w3kllc/ddns:latest
+docker pull flesniak/ddns:latest
 
 # Pull specific version
-docker pull w3kllc/ddns:v1.2.3
+docker pull flesniak/ddns:v1.2.3
 
 # Pull specific platform
-docker pull --platform linux/arm64 w3kllc/ddns:latest
+docker pull --platform linux/arm64 flesniak/ddns:latest
 ```
 
 ### Versioning Strategy
@@ -656,7 +656,7 @@ go mod tidy
    ```
 
 4. **Regular Updates**
-   Keep Docker image updated: `docker pull w3kllc/ddns:latest`
+   Keep Docker image updated: `docker pull flesniak/ddns:latest`
 
 5. **Monitor Security Dashboard**
    Check `/@/security` regularly for attack patterns
@@ -731,7 +731,7 @@ Contributions are welcome! Whether it's bug fixes, new features, documentation i
 
 ```bash
 # Clone the repository
-git clone https://github.com/w3K-one/docker-ddns-server.git
+git clone https://github.com/flesniak/docker-ddns-server.git
 cd docker-ddns-server
 
 # Build the application
@@ -770,7 +770,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 [benjaminbear/docker-ddns-server](https://github.com/benjaminbear/docker-ddns-server) - Added web UI for management
 
 **Enhanced Fork:**
-[w3K-one/docker-ddns-server](https://github.com/w3K-one/docker-ddns-server) - Security features, modern auth, multi-platform support
+[w3K-one/docker-ddns-server](https://github.com/flesniak/docker-ddns-server) - Security features, modern auth, multi-platform support
 
 ### Major Enhancements in This Fork
 
@@ -789,9 +789,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 💬 Support
 
-- **Issues:** [GitHub Issues](https://github.com/w3K-one/docker-ddns-server/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/w3K-one/docker-ddns-server/discussions)
-- **Docker Hub:** [w3kllc/ddns](https://hub.docker.com/r/w3kllc/ddns)
+- **Issues:** [GitHub Issues](https://github.com/flesniak/docker-ddns-server/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/flesniak/docker-ddns-server/discussions)
+- **Docker Hub:** [flesniak/ddns](https://hub.docker.com/r/flesniak/ddns)
 
 ---
 
@@ -808,7 +808,7 @@ Potential future enhancements:
 - Advanced search and filtering in logs
 - Bulk host management
 
-Have an idea? [Open an issue](https://github.com/w3K-one/docker-ddns-server/issues) or start a [discussion](https://github.com/w3K-one/docker-ddns-server/discussions)!
+Have an idea? [Open an issue](https://github.com/flesniak/docker-ddns-server/issues) or start a [discussion](https://github.com/flesniak/docker-ddns-server/discussions)!
 
 ---
 
