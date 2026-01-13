@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/labstack/echo/v4"
 	"github.com/w3K-one/docker-ddns-server/dyndns/model"
 	"github.com/w3K-one/docker-ddns-server/dyndns/nswrapper"
-	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
@@ -20,9 +20,9 @@ func (h *Handler) ListCNames(c echo.Context) (err error) {
 	}
 
 	return c.Render(http.StatusOK, "listcnames", echo.Map{
-		"cnames": cnames,
-		"title":  h.Title,
-		"logoPath": h.LogoPath,
+		"cnames":       cnames,
+		"title":        h.Title,
+		"logoPath":     h.LogoPath,
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
 	})
@@ -37,10 +37,10 @@ func (h *Handler) AddCName(c echo.Context) (err error) {
 	}
 
 	return c.Render(http.StatusOK, "addcname", echo.Map{
-		"config": h.Config,
-		"hosts":  hosts,
-		"title":  h.Title,
-		"logoPath": h.LogoPath,
+		"config":       h.Config,
+		"hosts":        hosts,
+		"title":        h.Title,
+		"logoPath":     h.LogoPath,
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
 	})

@@ -50,9 +50,9 @@ func (h *Handler) ShowBlockedIPs(c echo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, "blocked_ips", echo.Map{
-		"blockedIPs": blockedIPs,
-		"title":      h.Title,
-		"logoPath":   h.LogoPath,
+		"blockedIPs":   blockedIPs,
+		"title":        h.Title,
+		"logoPath":     h.LogoPath,
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
 	})
@@ -68,9 +68,9 @@ func (h *Handler) ShowFailedAuths(c echo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, "failed_auths", echo.Map{
-		"failedAuths": failedAuths,
-		"title":       h.Title,
-		"logoPath":    h.LogoPath,
+		"failedAuths":  failedAuths,
+		"title":        h.Title,
+		"logoPath":     h.LogoPath,
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
 	})

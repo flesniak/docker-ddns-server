@@ -3,10 +3,11 @@ package nswrapper
 import (
 	"bytes"
 	"errors"
-	"github.com/labstack/gommon/log"
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/labstack/gommon/log"
 
 	"github.com/w3K-one/docker-ddns-server/dyndns/ipparser"
 )

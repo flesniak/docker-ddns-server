@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/w3K-one/docker-ddns-server/dyndns/model"
 	"github.com/labstack/echo/v4"
+	"github.com/w3K-one/docker-ddns-server/dyndns/model"
 )
 
 // CreateLogEntry simply adds a log entry to the database.
@@ -27,9 +27,9 @@ func (h *Handler) ShowLogs(c echo.Context) (err error) {
 	}
 
 	return c.Render(http.StatusOK, "listlogs", echo.Map{
-		"logs":  logs,
-		"title": h.Title,
-		"logoPath": h.LogoPath,
+		"logs":         logs,
+		"title":        h.Title,
+		"logoPath":     h.LogoPath,
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
 	})
@@ -48,9 +48,9 @@ func (h *Handler) ShowHostLogs(c echo.Context) (err error) {
 	}
 
 	return c.Render(http.StatusOK, "listlogs", echo.Map{
-		"logs":  logs,
-		"title": h.Title,
-		"logoPath": h.LogoPath,
+		"logs":         logs,
+		"title":        h.Title,
+		"logoPath":     h.LogoPath,
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
 	})

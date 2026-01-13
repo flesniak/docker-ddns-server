@@ -4,8 +4,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/w3K-one/docker-ddns-server/dyndns/model"
 	"github.com/labstack/gommon/log"
+	"github.com/w3K-one/docker-ddns-server/dyndns/model"
 	"gorm.io/gorm"
 )
 
@@ -109,7 +109,7 @@ func (h *Handler) BlockIP(ipAddress string, failureCount int, reason string) err
 		return err
 	}
 
-	log.Warnf("Blocked IP %s for %v (failures: %d, reason: %s)", 
+	log.Warnf("Blocked IP %s for %v (failures: %d, reason: %s)",
 		ipAddress, BlockDuration, failureCount, reason)
 
 	return nil
@@ -151,7 +151,7 @@ func (h *Handler) UnblockIP(ipAddress string) error {
 func GetClientIP(r interface{}) string {
 	// This function can be enhanced to check X-Forwarded-For, X-Real-IP headers
 	// For now, we'll use a simple extraction
-	
+
 	// You'll need to pass the Echo context here
 	// This is a helper that should be called from middleware
 	return ""
@@ -161,7 +161,7 @@ func GetClientIP(r interface{}) string {
 func (h *Handler) CleanupExpiredBlocks() error {
 	result := h.DB.Where("is_permanent = ? AND blocked_until < ?", false, time.Now()).
 		Delete(&model.BlockedIP{})
-	
+
 	if result.Error != nil {
 		log.Error("Failed to cleanup expired blocks:", result.Error)
 		return result.Error
@@ -178,9 +178,9 @@ func (h *Handler) CleanupExpiredBlocks() error {
 func (h *Handler) CleanupOldFailedAuths() error {
 	// Keep records for 30 days
 	cutoffTime := time.Now().Add(-30 * 24 * time.Hour)
-	
+
 	result := h.DB.Where("timestamp < ?", cutoffTime).Delete(&model.FailedAuth{})
-	
+
 	if result.Error != nil {
 		log.Error("Failed to cleanup old failed auths:", result.Error)
 		return result.Error

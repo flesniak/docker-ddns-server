@@ -31,7 +31,7 @@ func (h *Handler) IPBlockerMiddleware() echo.MiddlewareFunc {
 
 			if isBlocked {
 				log.Warnf("Blocked IP %s attempted to access %s", clientIP, c.Path())
-				
+
 				// Update last attempt time
 				if blockedIP != nil {
 					blockedIP.LastAttemptAt = time.Now()
@@ -63,7 +63,7 @@ func (h *Handler) SessionAuthMiddleware() echo.MiddlewareFunc {
 				if c.Request().URL.RawQuery != "" {
 					originalURL += "?" + c.Request().URL.RawQuery
 				}
-				
+
 				// Redirect to login page
 				return c.Redirect(http.StatusFound, "/@/login?redirect="+originalURL)
 			}
@@ -114,7 +114,7 @@ func (h *Handler) UpdateAuthMiddleware() echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			// Extract credentials
 			username, password, ok := c.Request().BasicAuth()
-			
+
 			if !ok {
 				// No credentials provided - this is NOT a failed auth attempt
 				// It's a misconfigured client or direct browser access
@@ -123,7 +123,7 @@ func (h *Handler) UpdateAuthMiddleware() echo.MiddlewareFunc {
 
 			// Attempt authentication
 			authenticated, authError := h.AuthenticateUpdate(username, password, c)
-			
+
 			// If there was a system error (not wrong credentials), don't log as failed auth
 			if authError != nil {
 				log.Errorf("Authentication system error: %v", authError)
@@ -138,12 +138,12 @@ func (h *Handler) UpdateAuthMiddleware() echo.MiddlewareFunc {
 					c.Request().Header.Get("X-Forwarded-For"),
 					c.Request().Header.Get("X-Real-IP"),
 				)
-				
+
 				log.Warnf("Failed DynDNS API authentication from IP %s, username: %s", clientIP, username)
-				
+
 				// Log the failed attempt (but DON'T trigger IP blocking for API endpoints)
 				h.LogFailedAuth(clientIP, c.Request().UserAgent(), c.Path(), username, password)
-				
+
 				return c.String(http.StatusUnauthorized, "badauth\n")
 			}
 
@@ -157,7 +157,7 @@ func (h *Handler) UpdateAuthMiddleware() echo.MiddlewareFunc {
 func (h *Handler) CleanupMiddleware() echo.MiddlewareFunc {
 	// Track last cleanup time
 	lastCleanup := &time.Time{}
-	
+
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// Run cleanup once per hour
@@ -169,7 +169,7 @@ func (h *Handler) CleanupMiddleware() echo.MiddlewareFunc {
 				now := time.Now()
 				lastCleanup = &now
 			}
-			
+
 			return next(c)
 		}
 	}
@@ -235,14 +235,14 @@ func trim(s string) string {
 	// Simple trim implementation
 	start := 0
 	end := len(s)
-	
+
 	for start < end && (s[start] == ' ' || s[start] == '\t') {
 		start++
 	}
-	
+
 	for end > start && (s[end-1] == ' ' || s[end-1] == '\t') {
 		end--
 	}
-	
+
 	return s[start:end]
 }

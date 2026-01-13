@@ -28,13 +28,13 @@ func (h *Handler) ShowLoginPage(c echo.Context) error {
 
 	// Check if there's an error message from failed login
 	errorMsg := c.QueryParam("error")
-	
+
 	return c.Render(http.StatusOK, "login", echo.Map{
-		"title":    h.Title,
-		"logoPath": h.LogoPath,
+		"title":        h.Title,
+		"logoPath":     h.LogoPath,
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
-		"error":    errorMsg,
+		"error":        errorMsg,
 	})
 }
 
@@ -141,9 +141,9 @@ func (h *Handler) HandleLogout(c echo.Context) error {
 	// ALWAYS render logout page (not redirect)
 	// Pass LogoutUrl so JavaScript can handle delayed redirect
 	return c.Render(http.StatusOK, "logout", echo.Map{
-		"title":     h.Title,
-		"logoPath":  h.LogoPath,
-		"logoutUrl": h.LogoutUrl, // Pass the logout URL to template
+		"title":        h.Title,
+		"logoPath":     h.LogoPath,
+		"logoutUrl":    h.LogoutUrl, // Pass the logout URL to template
 		"poweredBy":    h.PoweredBy,
 		"poweredByUrl": h.PoweredByUrl,
 	})
