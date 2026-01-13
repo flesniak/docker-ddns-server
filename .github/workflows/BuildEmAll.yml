@@ -3,9 +3,8 @@ name: Docker Multi-Platform Build, Push & Release
 on:
   # Trigger the workflow on pushes to the master branch that change files in the dyndns directory
   push:
-    branches: [ "master" ]
-    paths:
-      - 'dyndns/**'
+    tags:
+      - '*'
 
   # Allow this workflow to be run manually from the Actions tab
   workflow_dispatch:
@@ -39,12 +38,12 @@ jobs:
             echo "TAG=$COMMIT_MSG_VERSION" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          
+
           echo "No version found in commit message. Checking for existing Git tags."
-          
+
           # 2. If no version in commit, get the latest git tag
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null)
-          
+
           if [[ -n "$LATEST_TAG" ]]; then
             echo "Found latest tag: $LATEST_TAG"
             # Increment the patch version of the tag (e.g., v1.2.3 -> v1.2.4 or v1.2 -> v1.3)
@@ -91,7 +90,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      
+
       - name: Create GitHub Release
         if: github.event_name != 'pull_request' # Only run on push, not PR
         uses: softprops/action-gh-release@v1
@@ -100,6 +99,6 @@ jobs:
           name: Release ${{ steps.get_version.outputs.TAG }}
           body: |
             Docker Image: `${{ env.DOCKER_IMAGE_NAME }}:${{ steps.get_version.outputs.TAG }}`
-            
+
             ${{ github.event.head_commit.message }}
           # The action automatically attaches source code archives (zip and tar.gz)
