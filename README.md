@@ -82,10 +82,10 @@ services:
       - DDNS_DOMAINS=dyndns.example.com
       - DDNS_PARENT_NS=ns.example.com
       - DDNS_DEFAULT_TTL=3600
-      
+
       # Security (Recommended)
       - DDNS_SESSION_SECRET=your-random-32-character-secret-key
-      
+
       # Optional
       - DDNS_TITLE=My DynDNS Server
       - DDNS_CLEAR_LOG_INTERVAL=30
@@ -103,13 +103,24 @@ services:
 ### Environment Variables
 
 #### Required Variables
+**`DDNS_DOMAINS`**
+Comma-separated list of domains managed by the server.
+Example: `dyndns.example.com,dyndns.example.org`
 
-**`DDNS_ADMIN_LOGIN`**  
+**`DDNS_PARENT_NS`**
+Parent nameserver of your domain.
+Example: `ns.example.com`
+
+#### Security Variables (Recommended)
+
+**`DDNS_ADMIN_LOGIN`**
 Admin credentials in htpasswd format for web UI access.
 
 Generate with:
 ```bash
 htpasswd -nb username password
+# or alternatively
+openssl passwd -5
 ```
 
 For docker-compose.yml (escape dollar signs):
@@ -119,21 +130,7 @@ echo $(htpasswd -nb username password) | sed -e s/\\$/\\$\\$/g
 
 If not set, all `/@/` routes are accessible without authentication (useful with auth proxy).
 
-**`DDNS_DOMAINS`**  
-Comma-separated list of domains managed by the server.  
-Example: `dyndns.example.com,dyndns.example.org`
-
-**`DDNS_PARENT_NS`**  
-Parent nameserver of your domain.  
-Example: `ns.example.com`
-
-**`DDNS_DEFAULT_TTL`**  
-Default TTL (Time To Live) for DNS records in seconds.  
-Example: `3600` (1 hour)
-
-#### Security Variables (Recommended)
-
-**`DDNS_SESSION_SECRET`**  
+**`DDNS_SESSION_SECRET`**
 Secret key for session encryption. Should be 32+ random characters.
 
 Generate with:
@@ -149,29 +146,58 @@ python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 
 #### Optional Variables
 
-**`DDNS_TITLE`**  
-Custom site title displayed in the web UI.  
-Default: `"w3K DynDNS"`
+**`DDNS_IP`**
+IPv4 address of the DDNS nameserver. If unset, the IP will be guessed using `icanhazip.com`.
+Default: guess (no A record set if no IPv4 address is found)
+Example: `1.2.3.4`
 
-**`DDNS_CLEAR_LOG_INTERVAL`**  
-Automatically clear log entries older than specified days.  
+**`DDNS_IP6`**
+IPv6 address of the DDNS nameserver. If unset, the IP will be guessed using `icanhazip.com`.
+Default: guess (no AAAA record set if no IPv6 address is found)
+Example: `1234::5678`
+
+**`DDNS_TITLE`**
+Custom site title displayed in the web UI.
+Default: `DynDNS Server`
+
+**`DDNS_CLEAR_LOG_INTERVAL`**
+Automatically clear log entries older than specified days.
 Example: `30` (keep 30 days of logs)
+Default: unset (never clear logs)
 
-**`DDNS_ALLOW_WILDCARD`**  
-Enable wildcard DNS resolution (e.g., `*.subdomain.dyndns.example.com`).  
+**`DDNS_ALLOW_WILDCARD`**
+Enable wildcard DNS resolution (e.g., `*.subdomain.dyndns.example.com`).
 Values: `true` or `false`
+Default: `false`
 
-**`DDNS_LOGOUT_URL`**  
-Redirect to this URL after logout.  
+**`DDNS_LOGOUT_URL`**
+Redirect to this URL after logout.
 Example: `https://example.com`
+Default: unset (no redirect)
 
-**`DDNS_POWERED_BY`**  
-Show this in the footer credits.  
+**`DDNS_POWERED_BY`**
+Show this in the footer credits.
 Example: `ACME Inc`
+Default: `Docker DDNS Server`
 
-**`DDNS_POWERED_BY_URL`**  
-The URL to _ACME Inc_.  
+**`DDNS_POWERED_BY_URL`**
+The URL to _ACME Inc_.
 Example: `https:/acme.inc`
+Default: `http://localhost`
+
+**`DDNS_DEFAULT_TTL`**
+Default TTL (Time To Live) for DNS records in seconds.
+Default: `3600` (1 hour)
+
+**`DDNS_TRANSFER`**
+Semicolon-separated list of DNS servers for zone transfers. Turns into `allow-transfer` within the bind config.
+Example: `192.168.1.10; 10.0.1.2;`
+Default: `none`
+
+**`DDNS_NOTIFY`**
+Semicolon-separated list of DNS servers to notify. Turns into `also-notify` within the bind config.
+Example: `192.168.1.10; 10.0.1.2;`
+Default: empty (no servers to notify)
 
 ---
 
@@ -225,7 +251,7 @@ Access the security dashboard at `/@/security` to:
 - Manually unblock IP addresses
 - View statistics and historical data
 
-**Password Logging Rationale:**  
+**Password Logging Rationale:**
 This is a single-user system where the admin is the only legitimate user. All other login attempts are malicious by definition. Password logging enables threat intelligence analysis to determine if attackers are getting close to your actual password. Ensure your database volume is properly secured.
 
 ---
@@ -252,7 +278,7 @@ The admin panel is accessible at `/@/` (not `/admin/` - more unique, less common
 5. Access admin panel
 6. Click logout icon (⏏️) when done
 
-**HTTPS Detection:**  
+**HTTPS Detection:**
 If running behind a reverse proxy with SSL, the system automatically detects HTTPS and enforces it for the admin panel while keeping API endpoints accessible via HTTP for device compatibility.
 
 ---
@@ -299,7 +325,7 @@ The server will automatically use the client's IP address from the request.
 
 API endpoints use **HTTP Basic Authentication** with the username and password you set for each host in the web UI (not the admin credentials).
 
-**Important:** 
+**Important:**
 - **Admin credentials** (`DDNS_ADMIN_LOGIN`) - For web UI access at `/@/`
 - **Host credentials** - For API updates, set per-host in the web UI
 
@@ -563,43 +589,43 @@ If migrating from `dprandzioch/docker-ddns` or older versions of this fork:
 
 ### Login Issues
 
-**Problem:** Login redirects back to login page  
+**Problem:** Login redirects back to login page
 **Solution:** Ensure `DDNS_SESSION_SECRET` is set. Without it, sessions won't persist.
 
-**Problem:** Can't remember admin password  
+**Problem:** Can't remember admin password
 **Solution:** Regenerate password with `htpasswd -nb username newpassword` and update `DDNS_ADMIN_LOGIN`
 
 ### HTTPS Issues
 
-**Problem:** HTTPS redirect loop  
+**Problem:** HTTPS redirect loop
 **Solution:** Verify reverse proxy sends `X-Forwarded-Proto: https` header
 
-**Problem:** "Not Secure" warning  
+**Problem:** "Not Secure" warning
 **Solution:** Check SSL certificate configuration in your reverse proxy
 
 ### IP Blocking
 
-**Problem:** Locked out after failed login attempts  
-**Solution:** 
+**Problem:** Locked out after failed login attempts
+**Solution:**
 - Wait 7 days for automatic unblock
 - OR manually remove from `blocked_ips` table in database
 - OR access database with SQLite: `DELETE FROM blocked_ips WHERE ip_address='YOUR_IP';`
 
 ### API Updates
 
-**Problem:** Device updates not working  
-**Solution:** 
+**Problem:** Device updates not working
+**Solution:**
 - API uses host credentials (from web UI), not admin credentials
 - Check username/password for specific host in `/@/hosts`
 - Verify device is sending correct Basic Auth headers
 
-**Problem:** "nochg" response from server  
+**Problem:** "nochg" response from server
 **Solution:** IP address hasn't changed, this is normal behavior
 
 ### Build Issues
 
-**Problem:** `missing go.sum entry for gorilla/sessions`  
-**Solution:** 
+**Problem:** `missing go.sum entry for gorilla/sessions`
+**Solution:**
 ```bash
 go get github.com/gorilla/sessions@v1.2.2
 go mod tidy
@@ -607,47 +633,47 @@ go mod tidy
 
 ### Database Issues
 
-**Problem:** Database locked errors  
+**Problem:** Database locked errors
 **Solution:** Ensure only one container instance is running
 
-**Problem:** Lost all data after update  
+**Problem:** Lost all data after update
 **Solution:** Check volume mounts are correct in docker-compose.yml
 
 ---
 
 ## 🛡️ Security Best Practices
 
-1. **Always Set Session Secret**  
+1. **Always Set Session Secret**
    Generate a strong random secret: `openssl rand -base64 32`
 
-2. **Use HTTPS with Reverse Proxy**  
+2. **Use HTTPS with Reverse Proxy**
    Never expose the admin panel over plain HTTP in production
 
-3. **Secure Database Volume**  
+3. **Secure Database Volume**
    Set appropriate file permissions:
    ```bash
    chmod 700 /path/to/database
    ```
 
-4. **Regular Updates**  
+4. **Regular Updates**
    Keep Docker image updated: `docker pull w3kllc/ddns:latest`
 
-5. **Monitor Security Dashboard**  
+5. **Monitor Security Dashboard**
    Check `/@/security` regularly for attack patterns
 
-6. **Strong Admin Password**  
+6. **Strong Admin Password**
    Use a password manager to generate and store strong credentials
 
-7. **Separate Credentials**  
+7. **Separate Credentials**
    Use different passwords for admin and each host
 
-8. **Firewall Configuration**  
+8. **Firewall Configuration**
    Limit access to web UI (port 8080) to trusted networks if possible
 
-9. **Database Backups**  
+9. **Database Backups**
    Regularly backup the database volume
 
-10. **Password Logging Awareness**  
+10. **Password Logging Awareness**
     Remember that failed auth logs include passwords - secure your database
 
 ---
@@ -737,13 +763,13 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Credits
 
-**Original Project:**  
+**Original Project:**
 [dprandzioch/docker-ddns](https://github.com/dprandzioch/docker-ddns) - Original DynDNS server implementation
 
-**Web UI Fork:**  
+**Web UI Fork:**
 [benjaminbear/docker-ddns-server](https://github.com/benjaminbear/docker-ddns-server) - Added web UI for management
 
-**Enhanced Fork:**  
+**Enhanced Fork:**
 [w3K-one/docker-ddns-server](https://github.com/w3K-one/docker-ddns-server) - Security features, modern auth, multi-platform support
 
 ### Major Enhancements in This Fork
