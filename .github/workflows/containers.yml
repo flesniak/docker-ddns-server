@@ -19,14 +19,14 @@ jobs:
           VERSION=${GITHUB_REF/refs\/tags\//}
           SHORTREF=${GITHUB_SHA::8}
           TAGS="${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:latest"
-      
+
           # Set output parameters
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=docker_image::${DOCKER_IMAGE}
+          echo "name=version::${VERSION}" >> $GITHUB_OUTPUT
+          echo "name=tags::${TAGS}" >> $GITHUB_OUTPUT
+          echo "name=docker_image::${DOCKER_IMAGE}" >> $GITHUB_OUTPUT
       - name: Get the version
         id: get_version
-        run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}     
+        run: echo "name=version::${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
       - name: Set up QEMU
         uses: docker/setup-qemu-action@master
         with:
