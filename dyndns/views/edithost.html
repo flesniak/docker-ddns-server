@@ -10,11 +10,11 @@
             <label for="hostname" class="col-form-label">.</label>
             <div class="col-sm input-group-append">
                 <select class="custom-select" name="domain" id="domain">
-                {{if .isEdit}}
+                {{if not .isEdit}}
                     <option selected>Choose...</option>
                 {{end}}
                 {{range $domain := .config.Domains}}
-                    <option {{if $.isEdit}}disabled="true" {{if eq $.host.Domain $domain}}selected{{end}}{{end}} value="{{$domain}}">{{$domain}}</option>
+                    <option {{if $.isEdit}}disabled {{if eq $.host.Domain $domain}}selected{{end}}{{end}} value="{{$domain}}">{{$domain}}</option>
                 {{end}}
                 </select>
             </div>
@@ -68,7 +68,7 @@
         </div>
         <div class="form-group row">
             <label for="trackingmode" class="col-sm-3 col-form-label">IPv6 Host Tracking:</label>
-            <div class="col-sm input-group">
+            <div class="col-sm input-group" id="trackingmode-radios">
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="trackingmode" id="trackOff" value="0" {{if eq $.host.TrackingMode 0}}checked{{end}}>
                     <label class="form-check-label" for="trackOff">Disabled</label>
@@ -83,30 +83,38 @@
                 </div>
             </div>
         </div>
-        <div class="form-group row">
-            <label for="trackingmode" class="col-sm-3 col-form-label">Host to track:</label>
-            <div class="col-sm">
-                <select class="custom-select" name="trackinghostid">
-                    <option selected value="none">None</option>
+        <fieldset id="tracking-params" {{if eq $.host.TrackingMode 0}}disabled{{end}}>
+            <div class="form-group row">
+                <label for="trackinghostid" class="col-sm-3 col-form-label">Host to track:</label>
+                <div class="col-sm">
+                    <select class="custom-select" id="trackinghostid" name="trackinghostid">
                     {{range $host, $id := .otherHosts}}
                         <option {{if eq $.host.TrackingHostID $id}}selected{{end}} value="{{$id}}">{{$host}}</option>
                     {{end}}
-                </select>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="ip6hostpart" class="col-sm-3 col-form-label">Static Host Address:</label>
-            <div class="col-sm">
-                <input type="text" class="form-control" placeholder="IPv6 Host Address" id="ip6hostpart" name="ip6hostpart" value="{{.host.Ip6HostPart}}">
-            </div>
-            <div class="input-group col-sm-2">
-                <div class="input-group-prepend">
-                    <div class="input-group-text">/</div>
+                    </select>
                 </div>
-                <input type="text" class="form-control" placeholder="Subnet Size" id="ip6hostsize" name="ip6hostsize" value="{{if .isEdit}}{{.host.Ip6HostSize}}{{else}}64{{end}}">
             </div>
-        </div>
+            <div class="form-group row">
+                <label for="ip6hostpart" class="col-sm-3 col-form-label">Static Host Address:</label>
+                <div class="col-sm">
+                    <input type="text" class="form-control" placeholder="IPv6 Host Address" id="ip6hostpart" name="ip6hostpart" value="{{.host.Ip6HostPart}}">
+                </div>
+                <div class="input-group col-sm-2">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">/</div>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Subnet Size" id="ip6hostsize" name="ip6hostsize" value="{{if .isEdit}}{{.host.Ip6HostSize}}{{else}}64{{end}}">
+                </div>
+            </div>
+        </fieldset>
         <div class="text-right"><button id="{{.host.ID}}" class="{{if .isEdit}}edit{{else}}add{{end}} host btn btn-primary">{{if .isEdit}}Edit{{else}}Add{{end}} Host Entry</button></div>
     </form>
 </div>
+<script>
+$(document).ready(function() {
+    $('#trackingmode-radios').on('change', function(event) {
+        $('#tracking-params').prop('disabled', event.target.value == 0);
+    });
+});
+</script>
 {{end}}

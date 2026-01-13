@@ -10,10 +10,10 @@ import (
 
 	l "github.com/labstack/gommon/log"
 
-	"github.com/labstack/echo/v4"
 	"github.com/benjaminbear/docker-ddns-server/dyndns/ipparser"
 	"github.com/benjaminbear/docker-ddns-server/dyndns/model"
 	"github.com/benjaminbear/docker-ddns-server/dyndns/nswrapper"
+	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
@@ -211,7 +211,7 @@ func (h *Handler) CreateHost(c echo.Context) (err error) {
 
 	// TrackingHostID is not bound to host, maybe because it's uint -> do it manually
 	trackingHostID := c.FormValue("trackinghostid")
-	if trackingHostID != "none" {
+	if trackingHostID != "" && trackingHostID != "none" {
 		id, err := strconv.Atoi(trackingHostID)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, &Error{err.Error()})
@@ -271,7 +271,7 @@ func (h *Handler) UpdateHost(c echo.Context) (err error) {
 
 	// TrackingHostID is not bound to hostUpdate, maybe because it's uint -> do it manually
 	trackingHostID := c.FormValue("trackinghostid")
-	if trackingHostID != "none" {
+	if trackingHostID != "" && trackingHostID != "none" {
 		id, err := strconv.Atoi(trackingHostID)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, &Error{err.Error()})
