@@ -3,7 +3,7 @@
 DDNS_DOMAINS=dyndns.example.com
 DDNS_PARENT_NS=ns.example.com
 # DDNS_DEFAULT_TTL=3600
-# DDNS_TRANSFER=none
+# DDNS_TRANSFER=1.2.3.4;
 # DDNS_NOTIFY=1.2.3.4;
 # DDNS_SESSION_SECRET=verysecretstring
 # DDNS_IP=1.2.3.4

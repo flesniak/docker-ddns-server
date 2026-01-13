@@ -190,12 +190,12 @@ Default TTL (Time To Live) for DNS records in seconds.
 Default: `3600` (1 hour)
 
 **`DDNS_TRANSFER`**
-Semicolon-separated list of DNS servers for zone transfers. Turns into `allow-transfer` within the bind config.
+List of DNS servers for zone transfers, each ending with a semicolon. Turns into `allow-transfer` within the bind config.
 Example: `192.168.1.10; 10.0.1.2;`
-Default: `none`
+Default: `none;` (no transfers allowed)
 
 **`DDNS_NOTIFY`**
-Semicolon-separated list of DNS servers to notify. Turns into `also-notify` within the bind config.
+Semicolon-separated list of DNS servers to notify, each ending with a semicolon. Turns into `also-notify` within the bind config.
 Example: `192.168.1.10; 10.0.1.2;`
 Default: empty (no servers to notify)
 

@@ -4,7 +4,7 @@
 [ -z "$DDNS_PARENT_NS" ] && echo "DDNS_PARENT_NS not set" && exit 1
 
 [ -z "$DDNS_DEFAULT_TTL" ] && DDNS_DEFAULT_TTL=3600
-[ -z "$DDNS_TRANSFER" ] && DDNS_TRANSFER=none
+[ -z "$DDNS_TRANSFER" ] && DDNS_TRANSFER="none;"
 
 if [ -z "$DDNS_IP" -a -z "$DDNS_IP6" ] ; then
         GUESS_IP="$(curl icanhazip.com)"
@@ -26,7 +26,7 @@ zone "$d" {
         type master;
         file "pri/$d.zone";
         allow-query { any; };
-        allow-transfer { ${DDNS_TRANSFER}; };
+        allow-transfer { ${DDNS_TRANSFER} };
         allow-update { localhost; };
         also-notify { ${DDNS_NOTIFY} };
 };
