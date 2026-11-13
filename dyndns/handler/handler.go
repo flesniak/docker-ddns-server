@@ -60,6 +60,10 @@ type Error struct {
 func (h *Handler) AuthenticateUpdate(username, password string, c echo.Context) (bool, error) {
 	h.CheckClearInterval()
 	reqParameter := strings.ToLower(c.QueryParam("hostname"))
+	if reqParameter == "" {
+		// alternatively, the dynv6 API uses the "zone" parameter
+		reqParameter = strings.ToLower(c.QueryParam("zone"))
+	}
 	reqArr := strings.SplitN(reqParameter, ".", 2)
 	if len(reqArr) != 2 {
 		log.Error("Error: Something wrong with the hostname parameter")
