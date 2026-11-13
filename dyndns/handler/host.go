@@ -357,7 +357,8 @@ func (h *Handler) UpdateIP(c echo.Context) (err error) {
 
 	ipv4 := c.QueryParam("ipv4")
 	ipv6 := strings.ToLower(c.QueryParam("ipv6"))
-	ipv6prefix := strings.ToLower(c.QueryParam("ipv6prefix"))
+	// the prefix may be sent with its length (e.g. "2001:db8:1::/64"); only the address is used
+	ipv6prefix, _, _ := strings.Cut(strings.ToLower(c.QueryParam("ipv6prefix")), "/")
 	myips := strings.ToLower(c.QueryParam("myip"))
 
 	log := &model.Log{Status: false, Host: *host, TimeStamp: time.Now(), UserAgent: nswrapper.ShrinkUserAgent(c.Request().UserAgent())}
